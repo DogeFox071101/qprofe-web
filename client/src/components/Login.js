@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Bar from "./bar/Bar";
+import Security from "./modules/Security";
 
 const Login = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const navigate = useNavigate();
 
-	const loginUser = () => {
+	const loginUser = async () => {
+		const pw = await Security.HashPassword(password)
 		fetch("http://localhost:4000/api/login", {
 			method: "POST",
 			body: JSON.stringify({
 				email,
-				password,
+				pw,
 			}),
 			headers: {
 				"Content-Type": "application/json",
@@ -33,9 +35,11 @@ const Login = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		loginUser();
-		setEmail("");
-		setPassword("");
+		loginUser().then(() => {
+			setEmail("");
+			setPassword("");
+		});
+		
 	};
 
 	return (

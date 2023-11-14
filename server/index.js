@@ -1,6 +1,7 @@
 const express = require("express");
 const { Novu } = require("@novu/node");
 const novu = new Novu("fe365d89231180940e0b0f2479a5dbcd");
+const Security = require("./modules/security")
 const cors = require("cors");
 const app = express();
 const PORT = 4000;
@@ -14,6 +15,7 @@ const threadList = [];
 
 const generateID = () => Math.random().toString(36).substring(2, 10);
 
+//Login
 app.post("/api/login", (req, res) => {
 	const { email, password } = req.body;
 	let result = users.filter(
@@ -31,7 +33,7 @@ app.post("/api/login", (req, res) => {
 		id: result[0].id,
 	});
 });
-
+//Register
 app.post("/api/register", async (req, res) => {
 	const { email, password, username } = req.body;
 	const id = generateID();
@@ -52,7 +54,7 @@ app.post("/api/register", async (req, res) => {
 		error_message: "El usuario ya existe",
 	});
 });
-
+//CreateThread
 app.post("/api/create/thread", async (req, res) => {
 	const { thread, userId } = req.body;
 	let threadId = generateID();
@@ -78,13 +80,13 @@ app.post("/api/create/thread", async (req, res) => {
 		threads: threadList,
 	});
 });
-
+//GetAllThreads
 app.get("/api/all/threads", (req, res) => {
 	res.json({
 		threads: threadList,
 	});
 });
-
+//SendLike
 app.post("/api/thread/like", (req, res) => {
 	const { threadId, userId } = req.body;
 	const result = threadList.filter((thread) => thread.id === threadId);
@@ -102,7 +104,7 @@ app.post("/api/thread/like", (req, res) => {
 		error_message: "Solo puedes reaccionar una vez",
 	});
 });
-
+//ReplyThread
 app.post("/api/thread/replies", (req, res) => {
 	const { id } = req.body;
 	const result = threadList.filter((thread) => thread.id === id);
@@ -111,7 +113,7 @@ app.post("/api/thread/replies", (req, res) => {
 		title: result[0].title,
 	});
 });
-
+//CreateReply
 app.post("/api/create/reply", async (req, res) => {
 	const { id, userId, reply } = req.body;
 	const result = threadList.filter((thread) => thread.id === id);
@@ -126,6 +128,15 @@ app.post("/api/create/reply", async (req, res) => {
 		message: "Respuesta agregada",
 	});
 });
+
+//SecurityFunctions
+app.post("/api/security/generate", async (req,res) =>{
+	const { msg } = req.body
+	const response = await Security.PwHasher(msg)
+	res.json({
+		sec : response
+	})
+})
 
 app.listen(PORT, () => {
 	console.log(`Server listening on ${PORT}`);

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Bar from "./bar/Bar";
+import Security from "./modules/Security";
 
 const Register = () => {
 	const [username, setUsername] = useState("");
@@ -9,12 +10,13 @@ const Register = () => {
 
 	const navigate = useNavigate();
 
-	const signUp = () => {
+	const signUp = async () => {
+		const pw = await Security.HashPassword(password)
 		fetch("http://localhost:4000/api/register", {
 			method: "POST",
 			body: JSON.stringify({
 				email,
-				password,
+				pw,
 				username,
 			}),
 			headers: {
@@ -35,10 +37,12 @@ const Register = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		signUp();
-		setEmail("");
-		setUsername("");
-		setPassword("");
+		signUp().then(() => {
+			setEmail("");
+			setUsername("");
+			setPassword("");
+		});
+		
 	};
 	return (
 		<div>
