@@ -1,7 +1,7 @@
-const crypto = require("crypto")
+import crypto from 'crypto';
 
 class Security {
-    static PwHasher = async (pw) => {
+    static passwordHash = async (pw) => {
         const utf8 = new TextEncoder().encode(pw)
             const hashBuffer = await crypto.subtle.digest('SHA-512', utf8);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -10,6 +10,9 @@ class Security {
                 ).join('')
         return hashHex;
     }
+    static generateUUID() {
+        return crypto.randomUUID()
+    }
 }
 
-module.exports = Security 
+export default Security

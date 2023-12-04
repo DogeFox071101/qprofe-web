@@ -1,19 +1,17 @@
-const express = require("express");
-const { Novu } = require("@novu/node");
+import express, { urlencoded, json } from "express";
+import { Novu } from "@novu/node";
+import Security from "./modules/Security.js";
+import cors from "cors";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 const novu = new Novu("fe365d89231180940e0b0f2479a5dbcd");
-const Security = require("./modules/security")
-const cors = require("cors");
-
-//Protección contra CSRF - Q'Profe
-const cookieParser = require("cookie-parser");
-const csurf = require("csurf");
-
-
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT;
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(urlencoded({ extended: true }));
+app.use(json());
 app.use(cors());
 
 //Protección contra CSRF - Q'Profe
@@ -26,14 +24,15 @@ app.use(csurf({ cookie: true }));
 const users = [];
 const threadList = [];
 
-const generateID = () => Math.random().toString(36).substring(2, 10);
+const generateID = () => Security.generateUUID().toString()
 
 //Login
 app.post("/api/login", (req, res) => {
 	const { email, password } = req.body;
+
 	let result = users.filter(
 		(user) => user.email === email && user.password === password
-	);
+	); //--------------------------------------------------------------------------------------------------------
 
 	if (result.length !== 1) {
 		return res.json({
@@ -58,7 +57,8 @@ app.post("/api/register", async (req, res) => {
 		const newUser = { id, email, password, username };
 		await novu.subscribers.identify(id, { email });
 
-		users.push(newUser);
+		users.push(newUser); //-----------------------------------------------------------------------------------
+
 		return res.json({
 			message: "Cuenta creada exitosamente",
 		});
@@ -71,23 +71,22 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/create/thread", async (req, res) => {
 	const { thread, userId } = req.body;
 	let threadId = generateID();
+
 	threadList.unshift({
 		id: threadId,
 		title: thread,
 		userId,
 		replies: [],
 		likes: [],
-	});
+	}); //---------------------------------------------------------------------------------------------------------
 
 	await novu.topics.create({
 		key: threadId,
 		name: thread,
 	 });
-
 	await novu.topics.addSubscribers(threadId, {
 	 	subscribers: [userId],
 	 });
-
 	res.json({
 		message: "Post creado exitosamente",
 		threads: threadList,
@@ -96,17 +95,19 @@ app.post("/api/create/thread", async (req, res) => {
 //GetAllThreads
 app.get("/api/all/threads", (req, res) => {
 	res.json({
-		threads: threadList,
+
+		threads: threadList, //----------------------------------------------------------------------------------------
+
 	});
 });
 //SendLike
 app.post("/api/thread/like", (req, res) => {
 	const { threadId, userId } = req.body;
-	const result = threadList.filter((thread) => thread.id === threadId);
+
+	const result = threadList.filter((thread) => thread.id === threadId); //--------------------------------------------
+
 	const threadLikes = result[0].likes;
-
 	const authenticateReaction = threadLikes.filter((user) => user === userId);
-
 	if (authenticateReaction.length === 0) {
 		threadLikes.push(userId);
 		return res.json({
@@ -120,7 +121,9 @@ app.post("/api/thread/like", (req, res) => {
 //ReplyThread
 app.post("/api/thread/replies", (req, res) => {
 	const { id } = req.body;
-	const result = threadList.filter((thread) => thread.id === id);
+
+	const result = threadList.filter((thread) => thread.id === id); //-------------------------------------------------
+
 	res.json({
 		replies: result[0].replies,
 		title: result[0].title,
@@ -129,6 +132,7 @@ app.post("/api/thread/replies", (req, res) => {
 //CreateReply
 app.post("/api/create/reply", async (req, res) => {
 	const { id, userId, reply } = req.body;
+<<<<<<< HEAD
 	const result = threadList.filter((thread) => thread.id === id);
 	const username = users.filter((user) => user.id === userId);
 
@@ -138,6 +142,12 @@ app.post("/api/create/reply", async (req, res) => {
 	if (!csrfTokenFromClient || csrfTokenFromClient !== req.csrfToken()) {
 	  return res.status(403).json({ error_message: "Token CSRF no válido" });
 	}
+=======
+
+	const result = threadList.filter((thread) => thread.id === id); //-------------------------------------------------
+
+	const username = users.filter((user) => user.id === userId); //----------------------------------------------------
+>>>>>>> a4e46155507e0c775e9cad1a003dea623872cea6
 
 	result[0].replies.unshift({ name: username[0].username, text: reply });
 
@@ -153,7 +163,7 @@ app.post("/api/create/reply", async (req, res) => {
 //SecurityFunctions
 app.post("/api/security/generate", async (req,res) =>{
 	const { msg } = req.body
-	const response = await Security.PwHasher(msg)
+	const response = await Security.passwordHash(msg)
 	res.json({
 		sec : response
 	})
