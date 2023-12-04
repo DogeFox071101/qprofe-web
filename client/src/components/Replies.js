@@ -9,7 +9,23 @@ const Replies = () => {
 	const navigate = useNavigate();
 	const { id } = useParams();
 
+	// Función para obtener el token CSRF de la cookie - Q'Profe
+	const obtenerTokenCSRF = () => {
+		const cookies = document.cookie.split("; ");
+		for (const cookie of cookies) {
+		  const [name, value] = cookie.split("=");
+		  if (name === "XSRF-TOKEN") {
+			return value;
+		  }
+		}
+		return null;
+	  };
+
 	const addReply = () => {
+
+		// Obtener el token CSRF de la cookie
+		const csrfToken = obtenerTokenCSRF();
+
 		fetch("http://localhost:4000/api/create/reply", {
 			method: "POST",
 			body: JSON.stringify({
@@ -19,6 +35,7 @@ const Replies = () => {
 			}),
 			headers: {
 				"Content-Type": "application/json",
+				"csrf-token": csrfToken,
 			},
 		})
 			.then((res) => res.json())

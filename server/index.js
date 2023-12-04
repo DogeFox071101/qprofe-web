@@ -3,12 +3,25 @@ const { Novu } = require("@novu/node");
 const novu = new Novu("fe365d89231180940e0b0f2479a5dbcd");
 const Security = require("./modules/security")
 const cors = require("cors");
+
+//Protección contra CSRF - Q'Profe
+const cookieParser = require("cookie-parser");
+const csurf = require("csurf");
+
+
 const app = express();
 const PORT = 4000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
+
+//Protección contra CSRF - Q'Profe
+app.use(cookieParser());
+
+// Configuración de csurf - Q'Profe
+app.use(csurf({ cookie: true }));
+
 
 const users = [];
 const threadList = [];
@@ -118,6 +131,14 @@ app.post("/api/create/reply", async (req, res) => {
 	const { id, userId, reply } = req.body;
 	const result = threadList.filter((thread) => thread.id === id);
 	const username = users.filter((user) => user.id === userId);
+
+	// Verificar el token CSRF - Q'Profe
+	const csrfTokenFromClient = req.headers["csrf-token"];
+
+	if (!csrfTokenFromClient || csrfTokenFromClient !== req.csrfToken()) {
+	  return res.status(403).json({ error_message: "Token CSRF no válido" });
+	}
+
 	result[0].replies.unshift({ name: username[0].username, text: reply });
 
 	 await novu.trigger("topicnotification", {
