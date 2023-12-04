@@ -132,22 +132,10 @@ app.post("/api/thread/replies", (req, res) => {
 //CreateReply
 app.post("/api/create/reply", async (req, res) => {
 	const { id, userId, reply } = req.body;
-<<<<<<< HEAD
-	const result = threadList.filter((thread) => thread.id === id);
-	const username = users.filter((user) => user.id === userId);
-
-	// Verificar el token CSRF - Q'Profe
-	const csrfTokenFromClient = req.headers["csrf-token"];
-
-	if (!csrfTokenFromClient || csrfTokenFromClient !== req.csrfToken()) {
-	  return res.status(403).json({ error_message: "Token CSRF no válido" });
-	}
-=======
 
 	const result = threadList.filter((thread) => thread.id === id); //-------------------------------------------------
 
 	const username = users.filter((user) => user.id === userId); //----------------------------------------------------
->>>>>>> a4e46155507e0c775e9cad1a003dea623872cea6
 
 	result[0].replies.unshift({ name: username[0].username, text: reply });
 
