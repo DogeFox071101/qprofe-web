@@ -1,6 +1,8 @@
-import { Client } from "node-postgres"
-import PgConnection from './PgConnection'
-import PgQuery from './PgQuery'
+import pg from 'pg'
+const { Client } = pg;
+import PgConnection from './PgConnection.js'
+import PgQuery from './PgQuery.js'
+import DB from '../DB.js'
 
 class PgDB extends DB {
     client = new Client()

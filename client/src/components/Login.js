@@ -9,28 +9,32 @@ const Login = () => {
 	const navigate = useNavigate();
 
 	const loginUser = async () => {
-		const pw = await Security.HashPassword(password)
-		fetch("http://localhost:4000/api/login", {
-			method: "POST",
-			body: JSON.stringify({
+		try {
+			const pw = await Security.HashPassword(password);
+			const response = await fetch("http://localhost:4000/api/auth/login", {
+			  method: "POST",
+			  body: JSON.stringify({
 				email,
 				pw,
-			}),
-			headers: {
+			  }),
+			  headers: {
 				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.error_message) {
-					alert(data.error_message);
-				} else {
-					alert(data.message);
-					navigate("/dashboard");
-					localStorage.setItem("_id", data.id);
-				}
-			})
-			.catch((err) => console.error(err));
+			  },
+			});
+	  
+			if (!response.ok) {
+			  const data = await response.json();
+			  throw new Error(data.error_message || "Error en el inicio de sesión");
+			}
+	  
+			const data = await response.json();
+			alert(data.message);
+			navigate("/dashboard");
+			localStorage.setItem("_id", data.id);
+		  } catch (error) {
+			console.error(error);
+			alert("Hubo un error en el inicio de sesión. Por favor, inténtelo de nuevo.");
+		  }
 	};
 
 	const handleSubmit = (e) => {

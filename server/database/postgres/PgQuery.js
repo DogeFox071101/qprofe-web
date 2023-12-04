@@ -1,5 +1,6 @@
-import { Client } from "node-postgres";
-import Query from '../Query'
+import pg from 'pg'
+const { Client } = pg;
+import Query from '../Query.js'
 
 class PgQuery extends Query {
     client
@@ -7,7 +8,7 @@ class PgQuery extends Query {
 
     constructor(client) {
         super()
-        if (client == Client) {
+        if (client instanceof Client) {
             this.client = client
         }
         else {

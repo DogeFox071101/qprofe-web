@@ -1,15 +1,16 @@
-import { Client } from "node-postgres";
-import Connection from '../Connection'
+import pg from 'pg'
+const { Client } = pg;
+import Connection from '../Connection.js'
 
 class PgConnection extends Connection {
     client
     constructor(client) {
         super()
-        if (client == Client) {
+        if (client instanceof Client) {
             this.client = client
         }
         else {
-            throw new Error("A node-postgres client was expected")
+            throw new Error("A pg client was expected")
         }
         
     }
@@ -18,7 +19,7 @@ class PgConnection extends Connection {
         return await this.client.connect()
     }
     async close() {
-        return await this.client.close()
+        return await this.client.end()
     }
 }
 export default PgConnection

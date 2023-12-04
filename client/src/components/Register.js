@@ -7,32 +7,34 @@ const Register = () => {
 	const [username, setUsername] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-
 	const navigate = useNavigate();
 
 	const signUp = async () => {
-		const pw = await Security.HashPassword(password)
-		fetch("http://localhost:4000/api/register", {
-			method: "POST",
-			body: JSON.stringify({
+		try {
+			const pw = await Security.HashPassword(password);
+			const response = await fetch("http://localhost:4000/api/auth/register", {
+			  method: "POST",
+			  body: JSON.stringify({
 				email,
-				pw,
+				password: pw,  // Use 'password' instead of 'pw'
 				username,
-			}),
-			headers: {
+			  }),
+			  headers: {
 				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.error_message) {
-					alert(data.error_message);
-				} else {
-					alert("Cuenta creada exitosamente");
-					navigate("/login");
-				}
-			})
-			.catch((err) => console.error(err));
+			  },
+			});
+	  
+			if (!response.ok) {
+			  const data = await response.json();
+			  throw new Error(data.error_message || "Error en el registro");
+			}
+	  
+			alert("Cuenta creada exitosamente");
+			navigate("/login");
+		  } catch (error) {
+			console.error(error);
+			alert("Hubo un error en el registro. Por favor, inténtelo de nuevo.");
+		  }
 	};
 
 	const handleSubmit = (e) => {
@@ -42,8 +44,8 @@ const Register = () => {
 			setUsername("");
 			setPassword("");
 		});
-		
 	};
+	
 	return (
 		<div>
 			<Bar />

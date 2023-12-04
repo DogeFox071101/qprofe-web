@@ -22,13 +22,13 @@ class LikeDAO {
         }
     }
     read() {
-
+        //TODO
     }
     update() {
-
+        //TODO
     }
     delete() {
-
+        //TODO
     }
 }
 export default LikeDAO

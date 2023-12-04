@@ -22,13 +22,13 @@ class ThreadDAO {
         }
     }
     read() {
-
+        //TODO
     }
     update() {
-
+        //TODO
     }
     delete() {
-        
+        //TODO
     }
 }
 export default ThreadDAO
